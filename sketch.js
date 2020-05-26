@@ -3,6 +3,7 @@ var END = 0;
 var gameState = PLAY;
 
 var trex, trex_running, trex_collided;
+var evil_trex;
 var ground, invisibleGround, groundImage;
 
 var cloudsGroup, cloudImage;
@@ -18,6 +19,9 @@ function preload(){
   trex_running =   loadAnimation("trex1.png","trex3.png","trex4.png");
   trex_collided = loadAnimation("trex_collided.png");
   
+  evil_trex_running =   loadAnimation("evil_trex1.png","evil_trex3.png","evil_trex4.png");
+  evil_trex_collided = loadAnimation("evil_trex_collided.png");
+
   groundImage = loadImage("ground2.png");
   
   cloudImage = loadImage("cloud.png");
@@ -36,12 +40,17 @@ function preload(){
 function setup() {
   createCanvas(600, 200);
   
-  trex = createSprite(50,180,20,50);
+  trex = createSprite(100,180,20,50);
+  evil_trex = createSprite(50,180,20,50);
   
   trex.addAnimation("running", trex_running);
   trex.addAnimation("collided", trex_collided);
   trex.scale = 0.5;
-  
+
+  evil_trex.addAnimation("running", evil_trex_running);
+  evil_trex.addAnimation("collided", evil_trex_collided);
+  trex.scale = 0.7;
+
   ground = createSprite(200,180,400,20);
   ground.addImage("ground",groundImage);
   ground.x = ground.width /2;
@@ -82,17 +91,29 @@ function draw() {
     }
   
     trex.velocityY = trex.velocityY + 0.8
-  
+    evil_trex.velocityY = evil_trex.velocityY + 0.8
+
     if (ground.x < 0){
       ground.x = ground.width/2;
     }
   
     trex.collide(invisibleGround);
+    evil_trex.collide(invisibleGround);
     spawnClouds();
     spawnObstacles();
   
-    if(obstaclesGroup.isTouching(trex)){
+    /*if(obstaclesGroup.isTouching(trex)){
         gameState = END;
+    }*/
+    trex.collide(obstaclesGroup);
+    
+    if (evil_trex.x == trex.x){
+      gameState = END;
+    }
+    
+    console.log(trex.x);
+    if (trex.x < 0){
+      gameState = END;
     }
   }
   else if (gameState === END) {
@@ -102,6 +123,7 @@ function draw() {
     //set velcity of each game object to 0
     ground.velocityX = 0;
     trex.velocityY = 0;
+    evil_trex.velocityY = 0;
     obstaclesGroup.setVelocityXEach(0);
     cloudsGroup.setVelocityXEach(0);
     
@@ -112,6 +134,8 @@ function draw() {
     obstaclesGroup.setLifetimeEach(-1);
     cloudsGroup.setLifetimeEach(-1);
     
+    text("The evil trex caught up to you!",140,300);
+
     if(mousePressedOver(restart)) {
       reset();
     }
